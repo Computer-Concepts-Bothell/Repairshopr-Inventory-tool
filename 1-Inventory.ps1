@@ -1,9 +1,8 @@
 #Jan2023 -- Dakotam@conceptsnet.com
 try {
-    $Version = "version = '1.0'"
-    $RemoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/{username}/{repository}/{branch}/script.ps1" -UseBasicParsing).Content
-    $RemoteVersion = $RemoteScript | Select-String -Pattern 'version = "[0-9.]+"' -AllMatches | % { $_.Matches } | % { $_.Value }
-
+    $Version = 1.0.0
+    $remoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -UseBasicParsing).Content
+    $RemoteVersion = ($remoteScript -split '\$version = "')[1].split('"')[0]
     if($localVersion -ne $RemoteVersion){
         $UpdateRequest = Read-Host "Current Version $Version is out date! Would you like to update? y/n"
         $BackupRequest = Read-Host "Would you like to backup the current script? y/n"
@@ -13,7 +12,7 @@ try {
         }
         if ($UpdateRequest -eq "y") {
             # download the new version if the version is different
-            (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/{username}/{repository}/{branch}/script.ps1" -UseBasicParsing).Content | Out-File "C:\path\to\local\script.ps1"
+            (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -UseBasicParsing).Content | Out-File "C:\path\to\local\script.ps1"
         }
     }
     if($localVersion -eq $RemoteVersion){
