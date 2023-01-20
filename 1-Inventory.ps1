@@ -1,12 +1,10 @@
 #Jan2023 -- Dakotam@conceptsnet.com
-$Version = 1.0
 try {
-    $localScript = Get-Content -Path ".\script.ps1"
-    $remoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -UseBasicParsing).Content
-    # extract the version variable from the local and remote scripts
-    $localVersion = $localScript | Select-String -Pattern '$version = "[0-9.]+"' -AllMatches | % { $_.Matches } | % { $_.Value }
-    $remoteVersion = $remoteScript | Select-String -Pattern '$version = "[0-9.]+"' -AllMatches | % { $_.Matches } | % { $_.Value }
-    if($localVersion -ne $remoteVersion){
+    $Version = "version = '1.0'"
+    $RemoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/{username}/{repository}/{branch}/script.ps1" -UseBasicParsing).Content
+    $RemoteVersion = $RemoteScript | Select-String -Pattern 'version = "[0-9.]+"' -AllMatches | % { $_.Matches } | % { $_.Value }
+
+    if($localVersion -ne $RemoteVersion){
         $UpdateRequest = Read-Host "Current Version $Version is out date! Would you like to update? y/n"
         $BackupRequest = Read-Host "Would you like to backup the current script? y/n"
         if ($BackupRequest -eq "y") {
@@ -18,7 +16,7 @@ try {
             (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/{username}/{repository}/{branch}/script.ps1" -UseBasicParsing).Content | Out-File "C:\path\to\local\script.ps1"
         }
     }
-    if($localVersion -eq $remoteVersion){
+    if($localVersion -eq $RemoteVersion){
         Write-Output "Current Version $Version is up to date."
     }
 }
