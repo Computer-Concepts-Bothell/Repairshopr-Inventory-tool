@@ -1,5 +1,30 @@
 #Jan2023 -- Dakotam@conceptsnet.com
-$ver = 0.1
+$Version = 1.0
+try {
+    $localScript = Get-Content -Path ".\script.ps1"
+    $remoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -UseBasicParsing).Content
+    # extract the version variable from the local and remote scripts
+    $localVersion = $localScript | Select-String -Pattern '$version = "[0-9.]+"' -AllMatches | % { $_.Matches } | % { $_.Value }
+    $remoteVersion = $remoteScript | Select-String -Pattern '$version = "[0-9.]+"' -AllMatches | % { $_.Matches } | % { $_.Value }
+    if($localVersion -ne $remoteVersion){
+        $UpdateRequest = Read-Host "Current Version $Version is out date! Would you like to update? y/n"
+        $BackupRequest = Read-Host "Would you like to backup the current script? y/n"
+        if ($BackupRequest -eq "y") {
+            #renames the current script file to 
+            Rename-Item -Path ".\1-inventory.ps1" -NewName "1-inventory-backup.ps1" -Force
+        }
+        if ($UpdateRequest -eq "y") {
+            # download the new version if the version is different
+            (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/{username}/{repository}/{branch}/script.ps1" -UseBasicParsing).Content | Out-File "C:\path\to\local\script.ps1"
+        }
+    }
+    if($localVersion -eq $remoteVersion){
+        Write-Output "Current Version $Version is up to date."
+    }
+}
+catch {
+    Write-Output "Unable to check for update. Current Version $Version"
+}
 #These Vars are editable if you need to change the subdomain or API. To change them go to the varibles.xml and change the data there. hoping to have this editable in the script using c
 #First time setup. Checks if the variables.xml is real. if fails, Asks the user questions about their shopr and saves them to an external file.
 try {
