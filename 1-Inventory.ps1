@@ -1,26 +1,30 @@
 #Jan2023 -- Dakotam@conceptsnet.com
+#Auto Updater Script
 try {
+    #Current Version. Make sure to update before pushing.
     $Version = "1.0.0"
     $remoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -UseBasicParsing).Content
     $RemoteVersion = ($remoteScript -split '\$version = "')[1].split('"')[0]
-    if($localVersion -ne $RemoteVersion){
+    #if the versions between local and github dont match. it will prompt for update and backup.
+    if($Version -ne $RemoteVersion){
         $UpdateRequest = Read-Host "Current Version $Version is out date! Would you like to update? y/n"
         $BackupRequest = Read-Host "Would you like to backup the current script? y/n"
         if ($BackupRequest -eq "y") {
             #renames the current script file to 
-            Rename-Item -Path ".\1-inventory.ps1" -NewName "1-inventory-backup.ps1" -Force
+            Rename-Item -Path .\1-inventory.ps1 -NewName "1-inventory-$Version-backup.ps1" -Force
+            Write-Output "The Current Script has been renamed to '1-inventory-$Version-backup.ps1'"
         }
         if ($UpdateRequest -eq "y") {
             # download the new version if the version is different
-            (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -UseBasicParsing).Content | Out-File "C:\path\to\local\script.ps1"
+            (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -UseBasicParsing).Content | Out-File .\1-inventory.ps1
         }
     }
-    if($localVersion -eq $RemoteVersion){
-        Write-Output "Current Version $Version is up to date."
+    if ($Version -eq $RemoteVersion) {
+        Write-Output "Current Version:$Version. is up to date!"
     }
 }
 catch {
-    Write-Output "Unable to check for update. Current Version $Version"
+    Write-Output "Unable to check for update. Current Version:$Version"
 }
 #These Vars are editable if you need to change the subdomain or API. To change them go to the varibles.xml and change the data there. hoping to have this editable in the script using c
 #First time setup. Checks if the variables.xml is real. if fails, Asks the user questions about their shopr and saves them to an external file.
@@ -212,3 +216,4 @@ do {
     $Continue = Read-Host -Prompt "$CSay"
     #keeping the loop going while user hasnt put n in the prompt
 } while ($Continue -ne "n")
+
