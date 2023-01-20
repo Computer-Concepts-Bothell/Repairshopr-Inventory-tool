@@ -1,6 +1,6 @@
 #Jan2023 -- Dakotam@conceptsnet.com
 try {
-    $Version = 1.0.0
+    $Version = "1.0.0"
     $remoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -UseBasicParsing).Content
     $RemoteVersion = ($remoteScript -split '\$version = "')[1].split('"')[0]
     if($localVersion -ne $RemoteVersion){
