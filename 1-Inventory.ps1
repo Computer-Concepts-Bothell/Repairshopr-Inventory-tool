@@ -1,8 +1,11 @@
 #Jan2023 -- Dakotam@conceptsnet.com
+#format spacer reused so i dont have to copy and paste the same bit or count. Lazness pays off now. 
+$Spacer = "_______________"
 #Auto Updater Script
 try {
     #Current Version. Make sure to update before pushing.
-    $Version = "1.0.3"
+    $Version = "1.4.0"
+    #$TVersion = "1.4.0"
     $headers = @{ "Cache-Control" = "no-cache" }
     $remoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -Headers $headers -UseBasicParsing).Content
     $RemoteVersion = ($remoteScript -split '\$version = "')[1].split('"')[0]
@@ -44,14 +47,17 @@ try {
         CName = Read-Host "What is your Company Name?"
         SubDom = Read-Host "What is the sub domain you have at repairshopr? Example '*****.repairshopr.com'"
         APIKey = Read-Host "What is the API key you have made for this? Make sure it has ONLY The following permissions List/search, Edit, ViewCost"
+        Change_maintain_stock = Read-Host "Do you want to change the product to maintain stock? If the product is not marked as maintianed it wont show the qty of the product on the website unless you are ON the product page. Y/N"
     }
     $CFiles | Export-Clixml -Path .\variables.xml
     $CFiles = Import-Clixml -Path .\variables.xml
+    Write-Output $Spacer
 }
 #These Vars setup the whole Script Please don't edit
 $APIKey = $CFiles.APIKey
 $SubDom = $CFiles.SubDom
 $CName = $CFiles.CName 
+$Maintained = $CFiles.Change_maintain_stock
 #gets the date and changes to the formate yyMMdd so that we can use that for sort order 
 $DateString = (Get-Date -UFormat %y%m%d)
 #setup the vars for the API requests
@@ -60,8 +66,7 @@ $postheaders = @{Authorization = "Bearer $APIKey"
 $contenttype = "application/json"
 #This Var is to use for the if statments to ignore when a cmd has been typed
 $IgnoredInputs = "n", "c", "s", "o", "help", "export"
-#format spacer reused so i dont have to copy and paste the same bit or count. Lazness pays off now. 
-$Spacer = "_______________"
+
 #This var is for the product IDs to get saved when needed.
 $SavedList = @()
 #creates the UPC var for later use
@@ -75,6 +80,7 @@ $ELogs = [Ordered]@{
     Company = $CName
     Name = Read-Host "What is your Name?"
     Date = (Get-Date -Format "yyyy-MM-dd@HH.mm")
+    ChangedMaintained = $Maintained
     NumProdScanned = 0
     NumProdSaved = 0
     UPCsNotFound = 0
@@ -82,9 +88,11 @@ $ELogs = [Ordered]@{
     SavedProdID = @()
 }
 #start of main
+Write-Output "Welcome to $CName PS Inventory Tool"
 $Continue = Read-Host "$CSay"
 #once the user has been inputed it is checked if it matches any of the coded commands. if not a command runs it as a UPC check.
 do {
+    $CFiles = Import-Clixml -Path .\variables.xml
     if ($Continue -notin $IgnoredInputs) {
         #changes the UPC var to the user input.
         $UPC = $Continue
@@ -102,6 +110,7 @@ do {
             $PriceCost = $Response.products[0].price_cost
             $SortOrder = $Response.products[0].sort_order
             $Serialized = $Response.products[0].serialized
+            $MStock = $Response.products[0].maintain_stock
             #Prints those vars out to the user. So that they can double check what they see matches.
             Write-Output $Spacer
             Write-Host "ProdID: $ProdID"
@@ -110,6 +119,7 @@ do {
             Write-Host "Price: $Price"
             Write-Host "Quantity: $Quantity"
             Write-Host "Last Scanned Date: $SortOrder"
+            Write-Host "MStock: $MStock"
             #if the devices is serialized it runs that as a API request then outputs the S/Ns 
             if ($Serialized -eq "True"){
                 Write-Output $Spacer
@@ -119,28 +129,91 @@ do {
                 $ResponseSN = $RequestSN.Content | ConvertFrom-Json
                 $ResponseSN.product_serials | ForEach-Object {Write-Output $_.serial_number}
             }
-            Write-Output $Spacer
+            if ($Maintained -eq "y") {
+                if ($MStock -eq $false) {
+                    Write-Output $Spacer
+                    Write-Host "Maintain Stock Was set to: $MStock. Updating to True. Updated the last scanned date."
+                    Write-Output $Spacer
+                    <# Action to perform if the condition is true #>
+                    $body = @{"sort_order" ="$DateString"; "maintain_stock" =$true;}
+                    #converts back to json then pushes that date change to the API using the sort order field
+                    $jsonBody = $body | ConvertTo-Json
+                    Invoke-RestMethod -Method PUT -Uri "https://$SubDom.repairshopr.com/api/v1/products/$ProdID" -ContentType $contenttype -Headers $postheaders -Body $jsonBody | Out-Null
+                }
+                if ($MStock -eq $true) {
+                    Write-Output $Spacer
+                    Write-Host "Updated the last scanned date."
+                    Write-Output $Spacer
+                    $body = @{"sort_order" ="$DateString";}
+                    #converts back to json then pushes that date change to the API using the sort order field
+                    $jsonBody = $body | ConvertTo-Json
+                    Invoke-RestMethod -Method PUT -Uri "https://$SubDom.repairshopr.com/api/v1/products/$ProdID" -ContentType $contenttype -Headers $postheaders -Body $jsonBody | Out-Null
+                }
+            }elseif ($Maintained -ne "y"){
+                Write-Output $Spacer
+                Write-Host "Updated the last scanned date."
+                Write-Output $Spacer
+                $body = @{"sort_order" ="$DateString";}
+                #converts back to json then pushes that date change to the API using the sort order field
+                $jsonBody = $body | ConvertTo-Json
+                Invoke-RestMethod -Method PUT -Uri "https://$SubDom.repairshopr.com/api/v1/products/$ProdID" -ContentType $contenttype -Headers $postheaders -Body $jsonBody | Out-Null
+            }
             #adding to logs var for those who want to export the data 
             $ELogs.ScannedProds += @("https://$SubDom.repairshopr.com/products/$ProdID/edit")
             $ELogs.NumProdScanned += 1
             #creates the var to update the sort order to the date that the user is scanning
-            $body = @{"sort_order" ="$DateString";}
-            #converts back to json then pushes that date change to the API using the sort order field
-            $jsonBody = $body | ConvertTo-Json
-            Invoke-RestMethod -Method PUT -Uri "https://$SubDom.repairshopr.com/api/v1/products/$ProdID" -ContentType $contenttype -Headers $postheaders -Body $jsonBody | Out-Null
-        }if (!$Response.products -and $Response.meta.total_entries -eq 0) {
+            
+            
+        }
+        #this is were the UPC fails at
+        if (!$Response.products -and $Response.meta.total_entries -eq 0) {
             $ELogs.UPCsNotFound += 1
             Write-Output $Spacer
             Write-Host "UPC not found"
             Write-Output $Spacer
          }
-    
     }
     if ($Continue -eq "c"){
         #This is under dev... This is wil be for changes if we want to add this, Just added the framework for the command.
+        $SettingsSay = "Type your requested change, APIKey, CompanyName, Subdomain. Type N to Cancel"
         Write-Output $Spacer
-        Write-Output "what do you want to change? Trick Question, nothing can be from here!"
+        Write-Output "what do you want to change?"
         Write-Output $Spacer
+        do  {
+            $ChangedYes = 0 
+            if ($ChangingVar -eq "APIKey") {
+                Write-Output $Spacer
+                $CFiles.APIKey = Read-Host "What is the API key you have made for this? Make sure it has ONLY The following permissions List/search, Edit, ViewCost"
+                $ChangedYes =+ 1
+                Write-Output $Spacer
+            }
+            if ($ChangingVar -eq "CompanyName") {
+                Write-Output $Spacer
+                $CFiles.CName = Read-Host "What is your Company Name?"
+                $ChangedYes =+ 1
+                Write-Output $Spacer
+            }
+            if ($ChangingVar -eq "Subdomain") {
+                Write-Output $Spacer
+                $CFiles.SubDom = Read-Host "What is the sub domain you have at repairshopr? Example '*****.repairshopr.com'"
+                $ChangedYes =+ 1
+                Write-Output $Spacer
+            }                  
+            $CFiles | Export-Clixml -Path .\variables.xml    
+            $ChangingVar = Read-Host $SettingsSay
+            if ($ChangingVar -eq "n" -and $ChangedYes -ne "0"){
+                #Write-Output "Please Close this script and open the updated version"
+                Write-Output $Spacer
+                Read-Host -Prompt "Press any key to reload the script"
+                Start-Process powershell -ArgumentList "-File `".\1-inventory.ps1`"" -NoNewWindow
+                Write-Output $Spacer
+                Exit
+            }
+            if ($ChangingVar -eq "n"){
+                $ChangingVar = "f"
+                Write-Output $Spacer
+            }
+        }while($ChangingVar -ne "f")
     }
     if ($Continue -eq "s"){
         #This area is to save the prod in question to a var so that its logged and can be opened later
@@ -177,6 +250,7 @@ do {
             Start-Process "https://$SubDom.repairshopr.com/"
             Write-Output $Spacer
         }
+        Write-Output $Spacer
     }
     if ($Continue -eq "help"){
         #This area is to inform what this tool can do.
@@ -201,6 +275,8 @@ do {
         Write-Output "'o' - Typing O will open the saved products to their product page in repairshopr, Make sure you are already signed in or it will just open a lot of sign in pages."
         Write-Output "'n' - Typing N will close the script out."
         Write-Output "'export'- Typing export will export a json file with usefull info. like who, date, links what products were scanned, saved, total amount of scanned/saved."
+        Write-Output "'r' - Typing r will reload the script."
+        Write-Output "'c' - Typing c will let you make changes to the Company Varibles saved during first time setup."
         Write-Output $Spacer
     }
     if ($Continue -eq "export"){
@@ -215,10 +291,24 @@ do {
         Write-Output $Spacer
         Write-Output "The Data should have been exported to a file called $SaveName.json in the same location as the script"
         Write-Output $Spacer
-    }    
+    }
+    if ($Continue -eq "r"){
+        $RConfirm = Read-Host "Are you sure you would like to reload? Y/N"
+        if ($Rconfrim -eq "y") {
+            Start-Process powershell -ArgumentList "-File `".\1-inventory.ps1`"" -NoNewWindow
+            Write-Output $Spacer
+            Exit
+        }
+        if ($RConfirm -eq "r") {
+            Start-Process powershell -ArgumentList "-File `".\1-WIP-inventory.ps1`"" -NoNewWindow
+            Write-Output $Spacer
+            Exit
+        }
+    }   
+    if ($Continue -eq "credits"){
+        Write-Output "This Tool is a open source Powershell tool created by Dakota @ pixelbays on github. If you have any problems or issues make and issue on github."
+    }  
     #Asks for another UPC or to stop
     $Continue = Read-Host -Prompt "$CSay"
     #keeping the loop going while user hasnt put n in the prompt
 } while ($Continue -ne "n")
-
-
