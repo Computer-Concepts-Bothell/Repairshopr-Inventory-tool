@@ -4,7 +4,7 @@ $Spacer = "_______________"
 #Auto Updater Script
 try {
     #Current Version. Make sure to update before pushing.
-    $Version = "1.5.0"
+    $Version = "1.5.1"
     #$TVersion = "1.4.0"
     $headers = @{ "Cache-Control" = "no-cache" }
     $remoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -Headers $headers -UseBasicParsing).Content
@@ -137,7 +137,7 @@ do {
                     #converts back to json then pushes that date change to the API using the sort order field
                     $jsonBody = $body | ConvertTo-Json
                     Invoke-RestMethod -Method PUT -Uri "https://$SubDom.repairshopr.com/api/v1/products/$ProdID" -ContentType $contenttype -Headers $postheaders -Body $jsonBody | Out-Null
-                }
+            }
             }elseif ($Maintained -ne "y"){
                 Write-Output $Spacer
                 Write-Host "Updated the last scanned date."
@@ -151,8 +151,6 @@ do {
             $ELogs.ScannedProds += @("https://$SubDom.repairshopr.com/products/$ProdID/edit")
             $ELogs.NumProdScanned += 1
             #creates the var to update the sort order to the date that the user is scanning
-            
-            
         }
         #this is were the UPC fails at
         if (!$Response.products -and $Response.meta.total_entries -eq 0) {
@@ -161,7 +159,6 @@ do {
             Write-Host "UPC not found"
             Write-Output $Spacer
          }
-    }
     if ($Continue -eq "c"){
         #This is the area to Change the saved vars in varibles 
         $SettingsSay = "Type your requested change, APIKey, CompanyName, Subdomain, MStock. Type N to Cancel"
