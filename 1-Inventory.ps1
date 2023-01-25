@@ -4,7 +4,7 @@ $Spacer = "_______________"
 #Auto Updater Script
 try {
     #Current Version. Make sure to update before pushing.
-    $Version = "1.4.0"
+    $Version = "1.4.1"
     #$TVersion = "1.4.0"
     $headers = @{ "Cache-Control" = "no-cache" }
     $remoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -Headers $headers -UseBasicParsing).Content
@@ -130,21 +130,10 @@ do {
                 $ResponseSN.product_serials | ForEach-Object {Write-Output $_.serial_number}
             }
             if ($Maintained -eq "y") {
-                if ($MStock -eq $false) {
                     Write-Output $Spacer
                     Write-Host "Maintain Stock Was set to: $MStock. Updating to True. Updated the last scanned date."
                     Write-Output $Spacer
-                    <# Action to perform if the condition is true #>
                     $body = @{"sort_order" ="$DateString"; "maintain_stock" =$true;}
-                    #converts back to json then pushes that date change to the API using the sort order field
-                    $jsonBody = $body | ConvertTo-Json
-                    Invoke-RestMethod -Method PUT -Uri "https://$SubDom.repairshopr.com/api/v1/products/$ProdID" -ContentType $contenttype -Headers $postheaders -Body $jsonBody | Out-Null
-                }
-                if ($MStock -eq $true) {
-                    Write-Output $Spacer
-                    Write-Host "Updated the last scanned date."
-                    Write-Output $Spacer
-                    $body = @{"sort_order" ="$DateString";}
                     #converts back to json then pushes that date change to the API using the sort order field
                     $jsonBody = $body | ConvertTo-Json
                     Invoke-RestMethod -Method PUT -Uri "https://$SubDom.repairshopr.com/api/v1/products/$ProdID" -ContentType $contenttype -Headers $postheaders -Body $jsonBody | Out-Null
