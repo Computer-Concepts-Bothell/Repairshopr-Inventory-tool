@@ -4,7 +4,7 @@ $Spacer = "_______________"
 #Auto Updater Script
 try {
     #Current Version. Make sure to update before pushing.
-    $Version = "1.4.1"
+    $Version = "1.5.0"
     #$TVersion = "1.4.0"
     $headers = @{ "Cache-Control" = "no-cache" }
     $remoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -Headers $headers -UseBasicParsing).Content
@@ -163,8 +163,8 @@ do {
          }
     }
     if ($Continue -eq "c"){
-        #This is under dev... This is wil be for changes if we want to add this, Just added the framework for the command.
-        $SettingsSay = "Type your requested change, APIKey, CompanyName, Subdomain. Type N to Cancel"
+        #This is the area to Change the saved vars in varibles 
+        $SettingsSay = "Type your requested change, APIKey, CompanyName, Subdomain, MStock. Type N to Cancel"
         Write-Output $Spacer
         Write-Output "what do you want to change?"
         Write-Output $Spacer
@@ -187,7 +187,13 @@ do {
                 $CFiles.SubDom = Read-Host "What is the sub domain you have at repairshopr? Example '*****.repairshopr.com'"
                 $ChangedYes =+ 1
                 Write-Output $Spacer
-            }                  
+            }
+            if ($ChangingVar -eq "MStock") {
+                Write-Output $Spacer
+                $CFiles.Change_maintain_stock = Read-Host "Do you want to change the product to maintain stock? If the product is not marked as maintianed it wont show the qty of the product on the website unless you are ON the product page. Y/N"
+                $ChangedYes =+ 1
+                Write-Output $Spacer
+            }                   
             $CFiles | Export-Clixml -Path .\variables.xml    
             $ChangingVar = Read-Host $SettingsSay
             if ($ChangingVar -eq "n" -and $ChangedYes -ne "0"){
@@ -241,6 +247,30 @@ do {
         }
         Write-Output $Spacer
     }
+    if ($Continue -eq "e"){
+        #This area is to open the product in question on the systems default browser, please make sure you already signed in otherwise it will only open sign in windows
+        Write-Output $Spacer
+        #checks if user has already done this before and typed yes if anything but y will ask again 
+        if ($Signedin -ne "y") {
+            Write-Output $Spacer
+            $Signedin = Read-Host "Is repairshopr open and signed in? Please make sure. y/n"
+            Write-Output $Spacer
+        }
+        #if yes opens the items that was last scanned
+        if ($Signedin -eq "y"){
+            Start-Process "https://$SubDom.repairshopr.com/products/$ProdID/edit"
+            Write-Output $Spacer
+            Write-Output "You have opened the link in your default browser for $ProdName, hope you were signed in."
+            Write-Output $Spacer
+        }elseif ($Signedin -eq "n") {
+            #if user said no opens repairshopr
+            Write-Output $Spacer
+            Write-Output "Please Make sure you have repairshopr opened and signed in before trying to export, Here I'll Open it for you."
+            Start-Process "https://$SubDom.repairshopr.com/"
+            Write-Output $Spacer
+        }
+        Write-Output $Spacer
+    }
     if ($Continue -eq "help"){
         #This area is to inform what this tool can do.
         Write-Output $Spacer
@@ -264,8 +294,9 @@ do {
         Write-Output "'o' - Typing O will open the saved products to their product page in repairshopr, Make sure you are already signed in or it will just open a lot of sign in pages."
         Write-Output "'n' - Typing N will close the script out."
         Write-Output "'export'- Typing export will export a json file with usefull info. like who, date, links what products were scanned, saved, total amount of scanned/saved."
-        Write-Output "'r' - Typing r will reload the script."
-        Write-Output "'c' - Typing c will let you make changes to the Company Varibles saved during first time setup."
+        Write-Output "'r' - Typing R will reload the script."
+        Write-Output "'c' - Typing C will let you make changes to the Company Varibles saved during first time setup."
+        Write-Output "'e' - Typing E will expand the current product scanned. Opening the link for just that product instead of all the saved ones."
         Write-Output $Spacer
     }
     if ($Continue -eq "export"){
