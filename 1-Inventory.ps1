@@ -4,8 +4,7 @@ $Spacer = "_______________"
 #Auto Updater Script
 try {
     #Current Version. Make sure to update before pushing.
-    $Version = "1.5.1"
-    #$TVersion = "1.4.0"
+    $Version = "1.5.3"
     $headers = @{ "Cache-Control" = "no-cache" }
     $remoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -Headers $headers -UseBasicParsing).Content
     $RemoteVersion = ($remoteScript -split '\$version = "')[1].split('"')[0]
@@ -47,7 +46,7 @@ try {
         CName = Read-Host "What is your Company Name?"
         SubDom = Read-Host "What is the sub domain you have at repairshopr? Example '*****.repairshopr.com'"
         APIKey = Read-Host "What is the API key you have made for this? Make sure it has ONLY The following permissions List/search, Edit, ViewCost"
-        Change_maintain_stock = Read-Host "Do you want to change the product to maintain stock? If the product is not marked as maintianed it wont show the qty of the product on the website unless you are ON the product page. Y/N"
+        Change_maintain_stock = Read-Host "Do you want to change the product to maintain stock? If the product is not marked as maintianed it will not update anything with the qty's. There is a bug in the API that breaks this feature... So should turn it on. Y/N"
     }
     $CFiles | Export-Clixml -Path .\variables.xml
     $CFiles = Import-Clixml -Path .\variables.xml
@@ -66,7 +65,6 @@ $postheaders = @{Authorization = "Bearer $APIKey"
 $contenttype = "application/json"
 #This Var is to use for the if statments to ignore when a cmd has been typed
 $IgnoredInputs = "n", "c", "s", "o", "help", "export"
-
 #This var is for the product IDs to get saved when needed.
 $SavedList = @()
 #creates the UPC var for later use
