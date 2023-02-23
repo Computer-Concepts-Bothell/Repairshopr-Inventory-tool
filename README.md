@@ -2,7 +2,6 @@
 > Quick inventory tool for repairshopr that uses powershell.
 
 Personally at our shop we have issues with inventory. I've built this tool in powershell so that we can quickly scan the UPC of a Product in inventory. Save products that are wrong, open them all later to review them, and export logs.
-![](header.png)
 
 ## Installation
 
@@ -14,7 +13,7 @@ you will have 6 options to pick from, which one you pick depends on you. if you 
 ```
 [Y] Yes  [A] Yes to All  [N] No  [L] No to All  [S] Suspend  [?] Help (default is "N"):
 ```
-If you select A. PLEASE make sure to understand what you are doing and to read scripts before running them. 
+If you select A. PLEASE make sure to understand what you are doing and to read ANY AND ALL scripts before running them. 
 
 ## Usage example
 
@@ -31,35 +30,23 @@ API Key:
 
 ## Development setup
 
-Describe how to install all development dependencies and how to run an automated test-suite of some kind. Potentially do this for multiple platforms.
-
-```sh
-make install
-npm test
-```
+I used VScode for my IDE atm, loved Atom for the longest time but they are retiring it. Looking for others like atom.
 
 ## Release History
 
-* 0.2.1
-    * CHANGE: Update docs (module code remains unchanged)
-* 0.2.0
-    * CHANGE: Remove `setDefaultXYZ()`
-    * ADD: Add `init()`
-* 0.1.1
-    * FIX: Crash when calling `baz()` (Thanks @GenerousContributorName!)
-* 0.1.0
-    * The first proper release
-    * CHANGE: Rename `foo()` to `bar()`
-* 0.0.1
-    * Work in progress
+I'll Add Soon™
 
-## Meta
 
-Your Name – [@YourTwitter](https://twitter.com/dbader_org) – YourEmail@example.com
+## Road Map 
 
-Distributed under the XYZ license. See ``LICENSE`` for more information.
+This is mainly a test run to get the tool working asap. There will be a full rewrite later to make the tool be written better as of right now Its just if's in a do loop... 
+Please don't hate. It was written in haste with upset managers about inventory being wrong again.
 
-[https://github.com/yourname/github-link](https://github.com/dbader/)
+In terms of features the tool provides I think its pretty set for what we want it todo. If you want to add any please let me know on here.
+
+## Other Repairshopr Projects
+
+Not all my Repairshopr projects will work for everyone. That being said all my tools I release here are open sourced and are "attempted" to be configured in a way to be used by others. This tool is setup the best for it. feel free to take a look and see what is going on. 
 
 ## Contributing
 
@@ -69,10 +56,9 @@ Distributed under the XYZ license. See ``LICENSE`` for more information.
 4. Push to the branch (`git push origin feature/fooBar`)
 5. Create a new Pull Request
 
-<!-- Markdown link & img dfn's -->
-[npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/datadog-metrics
-[npm-downloads]: https://img.shields.io/npm/dm/datadog-metrics.svg?style=flat-square
-[travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
-[wiki]: https://github.com/yourname/yourproject/wiki
+
+## Meta
+
+Dakota – dakmessier@pixelbays.com
+go play some games you have been working awefully hard. <3
+
