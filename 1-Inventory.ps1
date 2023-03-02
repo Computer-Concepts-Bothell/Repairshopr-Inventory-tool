@@ -85,6 +85,15 @@ $ELogs = [Ordered]@{
     ScannedProds = @()
     SavedProdID = @()
 }
+# Create a new SpVoice objects
+Add-Type -AssemblyName System.speech
+
+$voice = New-Object System.Speech.Synthesis.SpeechSynthesizer
+
+# Set the speed - positive numbers are faster, negative numbers, slower
+$voice.rate = 0
+$voice.SelectVoice("Microsoft Zira Desktop")
+
 #start of main
 Write-Output "Welcome to $CName PS Inventory Tool"
 $Continue = Read-Host "$CSay"
@@ -118,6 +127,7 @@ do {
             Write-Host "Quantity: $Quantity"
             Write-Host "Last Scanned Date: $SortOrder"
             Write-Host "MStock: $MStock"
+            $voice.speak("Expected quantity is $Quantity") |Out-Null
             #if the devices is serialized it runs that as a API request then outputs the S/Ns 
             if ($Serialized -eq "True"){
                 Write-Output $Spacer
@@ -151,10 +161,11 @@ do {
             #creates the var to update the sort order to the date that the user is scanning
         }
         #this is were the UPC fails at
-        if (!$Response.products -and $Response.meta.total_entries -eq 0) {
+        if (!$Response.products -and $Response.meta.total_entries -eq 0 -and $Continue -isnot $IgnoredInputs) {
             $ELogs.UPCsNotFound += 1
             Write-Output $Spacer
             Write-Host "UPC not found"
+            $voice.speak("UPC not found") |Out-Null
             Write-Output $Spacer
          }
     if ($Continue -eq "c"){
