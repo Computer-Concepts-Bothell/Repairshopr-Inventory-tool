@@ -9,24 +9,31 @@ try {
     $remoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -Headers $headers -UseBasicParsing).Content
     $RemoteVersion = ($remoteScript -split '\$version = "')[1].split('"')[0]
     #if the versions between local and github dont match. it will prompt for update and backup.
-    if($Version -ne $RemoteVersion){
-        $UpdateRequest = Read-Host "Current Version $Version is out date! Would you like to update to $RemoteVersion ? y/n"
-        $BackupRequest = Read-Host "Would you like to backup the current script? y/n"
+    if($Version -lt $RemoteVersion){
+        $UpdateFound = Read-Host "Current Version $Version is out date! Would you like to update to $RemoteVersion ? y/n"
+        
+        if ($UpdateFound -eq "y") {
+            $BackupRequest = Read-Host "Would you like to backup the current script? y/n"
+            $UpdateRequest = "y"
+        }
         if ($BackupRequest -eq "y") {
             #renames the current script file to 
-            Rename-Item -Path .\1-inventory.ps1 -NewName "1-inventory-$Version-backup.ps1" -Force
-            Write-Output "The Current Script has been renamed to '1-inventory-$Version-backup.ps1'"
+            Rename-Item -Path .\1-Inventory.ps1 -NewName "Inventory-$Version-backup.ps1" -Force
+            Write-Output "The Current Script has been renamed to 'Inventory-$Version-backup.ps1'"
         }
         if ($UpdateRequest -eq "y") {
             # download the new version if the version is different
-            (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -UseBasicParsing).Content | Out-File .\1-inventory.ps1
+            (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -UseBasicParsing).Content | Out-File .\1-Inventory.ps1
             Write-Output "Please Close this script and open the updated version"
-            Read-Host -Prompt "Press any key to close the script"
-            Exit
+            Read-Host -Prompt "Press any key to reload the script"
+            . .\1-Inventory.ps1
         }
     }
     if ($Version -eq $RemoteVersion) {
         Write-Output "Current Version:$Version. is up to date!"
+    }
+    if ($Version -gt $RemoteVersion) {
+        Write-Output "Current Version:$Version. must be a dev build"
     }
 }
 catch {
