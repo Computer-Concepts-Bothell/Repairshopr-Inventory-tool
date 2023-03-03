@@ -161,7 +161,7 @@ do {
             #creates the var to update the sort order to the date that the user is scanning
         }
         #this is were the UPC fails at
-        if (!$Response.products -and $Response.meta.total_entries -eq 0 -and $Continue -isnot $IgnoredInputs) {
+        if (!$Response.products -and $Response.meta.total_entries -eq 0 -and $Continue -notin $IgnoredInputs) {
             $ELogs.UPCsNotFound += 1
             Write-Output $Spacer
             Write-Host "UPC not found"
