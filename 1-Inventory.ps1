@@ -4,7 +4,7 @@ $Spacer = "_______________"
 #Auto Updater Script
 try {
     #Current Version. Make sure to update before pushing.
-    $Version = "1.6.1"
+    $Version = "1.7.0"
     $headers = @{ "Cache-Control" = "no-cache" }
     $remoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -Headers $headers -UseBasicParsing).Content
     $RemoteVersion = ($remoteScript -split '\$version = "')[1].split('"')[0]
