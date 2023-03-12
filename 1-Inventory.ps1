@@ -1,16 +1,16 @@
 #Jan2023 -- Dakotam@conceptsnet.com
 #formating spacer reusable so i dont have to copy and paste the same bit or count. Lazness pays off now. 
 $Spacer = "_______________"
+#remotescript is linked to the github i use for this tool, if you are using a different branch or git, update this to yours. 
+$ToolLink = "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1"
 #this is 'tool' name. mostly used in changing the file name in the update part
 $ToolName = "1-Inventory"
-$ToolLink
 #Auto Updater Script
 try {
     #Current Version. Make sure to update before pushing.
     $Version = "1.7.5"
-    $headers = @{ "Cache-Control" = "no-cache" }
-    #remotescript is linked to the github i use for this tool, if you are using a different branch or git, update this to yours. 
-    $RemoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -Headers $headers -UseBasicParsing).Content
+    $headers = @{ "Cache-Control" = "no-cache" }   
+    $RemoteScript = (Invoke-WebRequest -Uri $ToolLink -Headers $headers -UseBasicParsing).Content
     $RemoteVersion = ($RemoteScript -split '\$version = "')[1].split('"')[0]
     #if the versions between local and github dont match. it will prompt for update and backup.
     #should be most self explaintory here
@@ -28,7 +28,7 @@ try {
         }
         if ($UpdateRequest -eq "y") {
             # download the new version if the version is different
-            (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -UseBasicParsing).Content | Out-File .\$toolname.ps1
+            (Invoke-WebRequest -Uri $ToolLink -UseBasicParsing).Content | Out-File .\$toolname.ps1
             Write-Output "Please Close this script and open the updated version"
             Read-Host -Prompt "Press any key to reload the script"
             . .\$ToolName.ps1
