@@ -30,23 +30,64 @@ API Key:
 
 ## Development setup
 
-I used VScode for my IDE atm, loved Atom for the longest time but they are retiring it. Looking for others like atom.
+I used VScode for my IDE atm, loved Atom for the longest time but they are retiring it. Looking for others like atom. Other that use w/e you want to change code to fit you best.
 
 ## Release History
+<details>
+<summary>1.7</summary>
+<br>
+revamped the update checker
+added more comments and made things more readable 
+</details>
+<details>
+<summary>1.6</summary>
+<br>
+Added Text to Voice to the script that will auto read out the qty of products scanned
+Fixed error in UPC not found
+</details>
+<details>
+<details>
+<summary>1.5 </summary>
+<br>
+Added command to open the last thing scanned instead of saving it then opening it later 
+</details>
+<details>
+<summary>1.4</summary>
+<br>
+Skipped a few versions 
+Added the start of being able to change the saved varible within the tool itself. 
+added the reload script cmd 
+added proper readme not properly filled out though
+added a work around for API bug.
+</details>
+<details>
+<summary>1.0</summary>
+<br>
+Polished the basic tool
+added an update checker at the start of the script
+added logs to export 
+</details>
+<details>
+<summary>0.1 initial release.</summary>
+<br>
+Basic form of the tool. can ask API with UPC and get some details back. 
+</details>
 
-I'll Add Soon™
+
 
 
 ## Road Map 
 
-This is mainly a test run to get the tool working asap. There will be a full rewrite later to make the tool be written better as of right now Its just if's in a do loop... 
+This is mainly a test run to get the tool working asap. There will be a full rewrite later to make the tool be written better as of right now Its just if's in a big loop... 
 Please don't hate. It was written in haste with upset managers about inventory being wrong again.
 
 In terms of features the tool provides I think its pretty set for what we want it todo. If you want to add any please let me know on here.
 
+need to add more settings that can be changed the in the tool. namely I need to add voice settings to the user change able settings.
+
 ## Other Repairshopr Projects
 
-Not all my Repairshopr projects will work for everyone. That being said all my tools I release here are open sourced and are "attempted" to be configured in a way to be used by others. This tool is setup the best for it. feel free to take a look and see what is going on. 
+Not all my Repairshopr projects will work for everyone. That being said all my tools I release here are open sourced and are "attempted" to be configured in a way to be used by others. This tool is setup the best for it at the moment. feel free to take a look and see what is going on. 
 
 ## Contributing
 

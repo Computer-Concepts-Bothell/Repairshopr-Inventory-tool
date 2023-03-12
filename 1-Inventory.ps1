@@ -1,42 +1,48 @@
 #Jan2023 -- Dakotam@conceptsnet.com
-#format spacer reused so i dont have to copy and paste the same bit or count. Lazness pays off now. 
+#formating spacer reusable so i dont have to copy and paste the same bit or count. Lazness pays off now. 
 $Spacer = "_______________"
+#this is 'tool' name. mostly used in changing the file name in the update part
+$ToolName = "1-Inventory"
+$ToolLink
 #Auto Updater Script
 try {
     #Current Version. Make sure to update before pushing.
-    $Version = "1.7.0"
+    $Version = "1.7.5"
     $headers = @{ "Cache-Control" = "no-cache" }
-    $remoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -Headers $headers -UseBasicParsing).Content
-    $RemoteVersion = ($remoteScript -split '\$version = "')[1].split('"')[0]
+    #remotescript is linked to the github i use for this tool, if you are using a different branch or git, update this to yours. 
+    $RemoteScript = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -Headers $headers -UseBasicParsing).Content
+    $RemoteVersion = ($RemoteScript -split '\$version = "')[1].split('"')[0]
     #if the versions between local and github dont match. it will prompt for update and backup.
+    #should be most self explaintory here
     if($Version -lt $RemoteVersion){
         $UpdateFound = Read-Host "Current Version $Version is out date! Would you like to update to $RemoteVersion ? y/n"
-        
         if ($UpdateFound -eq "y") {
+            #found that just having the script back itself up can be usefull. 
             $BackupRequest = Read-Host "Would you like to backup the current script? y/n"
             $UpdateRequest = "y"
         }
         if ($BackupRequest -eq "y") {
-            #renames the current script file to 
-            Rename-Item -Path .\1-Inventory.ps1 -NewName "Inventory-$Version-backup.ps1" -Force
-            Write-Output "The Current Script has been renamed to 'Inventory-$Version-backup.ps1'"
+            #renames the current script file to the tool back with version number
+            Rename-Item -Path .\$ToolName.ps1 -NewName "$ToolName-$Version-backup.ps1" -Force
+            Write-Output "The Current Script has been renamed to '$ToolName-$Version-backup.ps1'"
         }
         if ($UpdateRequest -eq "y") {
             # download the new version if the version is different
-            (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -UseBasicParsing).Content | Out-File .\1-Inventory.ps1
+            (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Pixelbays/Repairshopr-Inventory-tool/main/1-Inventory.ps1" -UseBasicParsing).Content | Out-File .\$toolname.ps1
             Write-Output "Please Close this script and open the updated version"
             Read-Host -Prompt "Press any key to reload the script"
-            . .\1-Inventory.ps1
+            . .\$ToolName.ps1
         }
     }
     if ($Version -eq $RemoteVersion) {
         Write-Output "Current Version:$Version. is up to date!"
     }
     if ($Version -gt $RemoteVersion) {
-        Write-Output "Current Version:$Version. must be a dev build"
+        Write-Output "Current Version:$Version. must be a dev build, prod build is $RemoteVersion"
     }
 }
 catch {
+    #if github was not reachable either due to internet or user error will fail. 
     Write-Output "Unable to check for update. Current Version:$Version"
 }
 #These Vars are editable if you need to change the subdomain or API. To change them go to the varibles.xml and change the data there. hoping to have this editable in the script using c
@@ -45,7 +51,7 @@ try {
     $CFiles = Import-Clixml -Path .\variables.xml
 } catch {
     Write-Output "Hello! Welcome to the PowerShell Repairshopr API Inventory tool!"
-    Write-Output "I'll ask a couple of questions, save them Locally in a file called variables.ps1."
+    Write-Output "I'll ask a couple of questions, save them Locally in a file called variables.xml."
     Write-Output "This way I dont know them, and you don't know mine!"
     Write-Output "keep varibles.xml in the same folder as the main script otherwise it wont work, and will be talking again."
     Write-Output $Spacer
@@ -71,7 +77,7 @@ $postheaders = @{Authorization = "Bearer $APIKey"
 "Accept" = "application/json"}
 $contenttype = "application/json"
 #This Var is to use for the if statments to ignore when a cmd has been typed
-$IgnoredInputs = "n", "c", "s", "o", "help", "export"
+$IgnoredInputs = "n", "c", "s", "o", "help", "export", "r"
 #This var is for the product IDs to get saved when needed.
 $SavedList = @()
 #creates the UPC var for later use
@@ -80,7 +86,7 @@ $UPC = ""
 $Signedin = ""
 #the request user input saying so i dont have to copy and paste the same bit or count. Lazness pays off now.
 $CSay = "Type/Scan a UPC or a valid command. Type help if needed"
-#this is the var that is setup for logs, and finally some user input!
+#this is the var that is setup for export logs, and finally some user input!
 $ELogs = [Ordered]@{
     Company = $CName
     Name = Read-Host "What is your Name?"
@@ -92,16 +98,15 @@ $ELogs = [Ordered]@{
     ScannedProds = @()
     SavedProdID = @()
 }
+#By user request I have added a text to speach saying the expected qty of inventory so we dont have to look at the screen after everybar code
 # Create a new SpVoice objects
 Add-Type -AssemblyName System.speech
-
 $voice = New-Object System.Speech.Synthesis.SpeechSynthesizer
-
 # Set the speed - positive numbers are faster, negative numbers, slower
 $voice.rate = 0
 $voice.SelectVoice("Microsoft Zira Desktop")
 
-#start of main
+#start of main body now... 100+ lines in
 Write-Output "Welcome to $CName PS Inventory Tool"
 $Continue = Read-Host "$CSay"
 #once the user has been inputed it is checked if it matches any of the coded commands. if not a command runs it as a UPC check.
@@ -167,14 +172,14 @@ do {
             $ELogs.NumProdScanned += 1
             #creates the var to update the sort order to the date that the user is scanning
         }
-        #this is were the UPC fails at
-        if (!$Response.products -and $Response.meta.total_entries -eq 0 -and $Continue -notin $IgnoredInputs) {
+    #this is were the UPC fails at
+        elseif (!$Response.products -and $Response.meta.total_entries -eq 0 -and $Continue -notin $IgnoredInputs) {
             $ELogs.UPCsNotFound += 1
             Write-Output $Spacer
             Write-Host "UPC not found"
             $voice.speak("UPC not found") |Out-Null
             Write-Output $Spacer
-         }
+            }
     if ($Continue -eq "c"){
         #This is the area to Change the saved vars in varibles 
         $SettingsSay = "Type your requested change, APIKey, CompanyName, Subdomain, MStock. Type N to Cancel"
@@ -235,7 +240,7 @@ do {
         Write-Output $Spacer
     }
     if ($Continue -eq "o"){
-        #This area is to open the products in question on the systems default browser, please make sure you already signed in otherwise it will only open sign in windows
+        #This area is to open the products saved list in question on the systems default browser, please make sure you already signed in otherwise it will only open sign in windows
         Write-Output $Spacer
         #checks if user has already done this before and typed yes if anything but y will ask again 
         if ($Signedin -ne "y") {
@@ -261,7 +266,7 @@ do {
         Write-Output $Spacer
     }
     if ($Continue -eq "e"){
-        #This area is to open the product in question on the systems default browser, please make sure you already signed in otherwise it will only open sign in windows
+        #This area is to open the last scanned product in question on the systems default browser, please make sure you already signed in otherwise it will only open sign in windows
         Write-Output $Spacer
         #checks if user has already done this before and typed yes if anything but y will ask again 
         if ($Signedin -ne "y") {
@@ -313,7 +318,7 @@ do {
         Write-Output $Spacer
     }
     if ($Continue -eq "export"){
-        #Exporting the data
+        #Exporting the data 
         $SaveName = $Elogs.Name + "-" + $Elogs.Date
         # Convert the hashtable to a JSON object
         $ELogsJSON = $ELogs | ConvertTo-Json
@@ -326,6 +331,7 @@ do {
         Write-Output $Spacer
     }
     if ($Continue -eq "r"){
+        #Often during dev I made a small tweak and dont want to close and reopen the script, So i've added this reload cmd to just reload the script.
         $RConfirm = Read-Host "Are you sure you would like to reload? Y/N"
         if ($Rconfrim -eq "y") {
             Start-Process powershell -ArgumentList "-File `".\1-inventory.ps1`"" -NoNewWindow
@@ -339,9 +345,9 @@ do {
         }
     }   
     if ($Continue -eq "credits"){
-        Write-Output "This Tool is a open source Powershell tool created by Dakota @ pixelbays on github. If you have any problems or issues make and issue on github."
+        Write-Output "This Tool is an open source Powershell tool created by Dakota @ pixelbays on github. If you have any problems or issues make and issue on github. Using The Repairshopr API and built in tools as well. Great system most of the time, We just don't use it properly "
     }  
-    #Asks for another UPC or to stop
+    #Asks for another UPC or to stop to keep the loop going
     $Continue = Read-Host -Prompt "$CSay"
     #keeping the loop going while user hasnt put n in the prompt
 } while ($Continue -ne "n")
