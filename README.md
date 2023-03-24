@@ -45,7 +45,7 @@ added more comments and made things more readable
 Added Text to Voice to the script that will auto read out the qty of products scanned
 Fixed error in UPC not found
 </details>
-<details>
+
 <details>
 <summary>1.5 </summary>
 <br>
